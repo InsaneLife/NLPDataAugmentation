@@ -12,7 +12,10 @@
 # here put the import lib
 import gensim
 from gensim.models.keyedvectors import KeyedVectors
+from nltk.corpus import wordnet
 import time
+import nltk
+nltk.download('omw')
 
 def load_w2v_fi():
     start = time.time()
@@ -22,9 +25,12 @@ def load_w2v_fi():
     return w2v_model
 
 if __name__ == '__main__':
-    w2v_model = load_w2v_fi()
+    
     word = "空调"
+    # 词向量召回
+    w2v_model = load_w2v_fi()
     print(w2v_model.similar_by_word(word)[:10])
     # [('冷气', 0.832690954208374), ('暖气', 0.7806607484817505), ('电扇', 0.7694630026817322), ('电热', 0.7415034174919128), ('风扇', 0.7370954751968384), ('供暖', 0.7363734841346741), ('采暖', 0.7239724397659302), ('电暖', 0.7215089797973633), ('通风', 0.7174738645553589), ('隔音', 0.7118726968765259)]
-
+    # wordNet 召回近义词
+    print(wordnet.synsets(word, lang='cmn'))
 

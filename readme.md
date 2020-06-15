@@ -7,7 +7,12 @@ TODO: 将[eda](https://arxiv.org/abs/1901.11196)中方法使用语言模型做�
 - random swap(RS)：随机选取两个词语，交换他们的位置，做n次。
 - random deletion(RD)：对于句子中的每个词语，以概率p选择删除。
 
+# 词语丰富
+用于丰富ontology，针对词语进行丰富，包括：
+1. 使用词向量做相似词语的召回，丰富ontology。
+2. 使用wordNet做近义词召回。
 
 # reference
 - [EDA: Easy Data Augmentation Techniques for Boosting Performance on Text Classification Tasks](https://arxiv.org/abs/1901.11196)
 - https://github.com/jasonwei20/eda_nlp
+- https://ai.tencent.com/ailab/nlp/en/embedding.html
