@@ -13,9 +13,10 @@
 import gensim
 from gensim.models.keyedvectors import KeyedVectors
 from nltk.corpus import wordnet
+import synonyms
 import time
 import nltk
-nltk.download('omw')
+# nltk.download('omw')
 
 def load_w2v_fi():
     start = time.time()
@@ -35,4 +36,6 @@ if __name__ == '__main__':
     for each in wordnet.synsets(word, lang='cmn'):
         print(each.lemma_names('cmn'), )
     # ['冷气机', '空调', '空调器', '空调装置', '空调设备']
+    print(synonyms.nearby(word))
+    # (['空调', '冷气', '空调设备', '空调系统', '波箱', '用车', '制冷', '空调机', '空气调节', '巴士在'], [1.0, 0.75175405, 0.7452018, 0.6877022, 0.6544307, 0.62812567, 0.62259305, 0.59779996, 0.57414114, 0.5611771])
 
