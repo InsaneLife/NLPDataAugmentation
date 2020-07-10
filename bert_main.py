@@ -15,7 +15,7 @@ import heapq
 from zhon.hanzi import punctuation
 import string
 import jieba
-
+from util import read_file
 from bert_modify import modeling as modeling, tokenization, optimization
 
 punc = string.punctuation + punctuation
@@ -107,71 +107,77 @@ if __name__ == "__main__":
     tf.train.init_from_checkpoint(init_checkpoint, assignment)
 
     # # 获取最后一层和倒数第二层。
+    # 改成读文件的方式
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
 
         token = tokenization.CharTokenizer(vocab_file=bert_vocab_file)
-        query = '帮我查一下航班信息'
-        query = '查一下航班信息'
-        query = '附近有什么好玩的'
-        split_tokens = token.tokenize(query)
-        word_ids = token.convert_tokens_to_ids(split_tokens)
-        word_ids.insert(0, token.convert_tokens_to_ids(["[CLS]"])[0])
-        word_ids.append(token.convert_tokens_to_ids(["[SEP]"])[0])
+        querys = read_file("data/input")
+        out_f = open("data/output", 'w')
+        # query = '帮我查一下航班信息'
+        # query = '查一下航班信息'
+        # query = '附近有什么好玩的'
+        for query in querys:
+            split_tokens = token.tokenize(query)
+            word_ids = token.convert_tokens_to_ids(split_tokens)
+            word_ids.insert(0, token.convert_tokens_to_ids(["[CLS]"])[0])
+            word_ids.append(token.convert_tokens_to_ids(["[SEP]"])[0])
 
-        # 分词
-        index_arr = [0]
-        seg_list = jieba.cut(query, cut_all=False)
-        i = 0
-        for each in seg_list:
-            i += len(each)
-            index_arr.append(i)
+            # 分词
+            index_arr = [0]
+            seg_list = jieba.cut(query, cut_all=False)
+            i = 0
+            for each in seg_list:
+                i += len(each)
+                index_arr.append(i)
 
-        # 插入字符
-        for i in index_arr:
-            insert_index = i + 1
-            print("index", i)
-            word_ids.insert(insert_index, token.convert_tokens_to_ids(["[MASK]"])[0])
-            mask_lm_position = [insert_index]
-            word_mask = [1] * len(word_ids)
-            word_segment_ids = [0] * len(word_ids)
-            fd = {input_ids: [word_ids], input_mask: [word_mask], segment_ids: [word_segment_ids], masked_lm_positions:[mask_lm_position]}
-            mask_probs, last2 = sess.run([predict_prob, masked_logits], feed_dict=fd)
-            for mask_prob in mask_probs:
-                mask_prob = mask_prob.tolist()
-                max_num_index_list = map(mask_prob.index, heapq.nlargest(3, mask_prob))
-                for i in max_num_index_list:
-                    words = token.id2vocab[i]
-                    if words in punc:
-                        continue
-                    new_query = [x for x in query]
-                    new_query.insert(insert_index-1, words)
-                    print("".join(new_query))
-                    # break
-            print('-' * 50)
-        pass
-        
-        # # 替换字符
-        # for i in range(len(query)):
-        #     insert_index = i + 1
-        #     print("index", insert_index)
-        #     word_ids[insert_index] = token.convert_tokens_to_ids(["[MASK]"])[0]
-        #     mask_lm_position = [insert_index]
-        #     word_mask = [1] * len(word_ids)
-        #     word_segment_ids = [0] * len(word_ids)
-        #     fd = {input_ids: [word_ids], input_mask: [word_mask], segment_ids: [word_segment_ids], masked_lm_positions:[mask_lm_position]}
-        #     mask_probs, last2 = sess.run([predict_prob, masked_logits], feed_dict=fd)
-        #     for mask_prob in mask_probs:
-        #         mask_prob = mask_prob.tolist()
-        #         max_num_index_list = map(mask_prob.index, heapq.nlargest(5, mask_prob))
-        #         for i in max_num_index_list:
-        #             words = token.id2vocab[i]
-        #             if words in punc or words in ['[UNK]']:
-        #                 continue
-        #             new_query = [x for x in query]
-        #             new_query[insert_index-1] = words
-        #             print("".join(new_query))
-        #             break
-        #     print('-' * 50)
-        #     pass
+            # 插入字符
+            for i in index_arr:
+                insert_index = i + 1
+                print("index", i)
+                word_ids.insert(insert_index, token.convert_tokens_to_ids(["[MASK]"])[0])
+                mask_lm_position = [insert_index]
+                word_mask = [1] * len(word_ids)
+                word_segment_ids = [0] * len(word_ids)
+                fd = {input_ids: [word_ids], input_mask: [word_mask], segment_ids: [word_segment_ids], masked_lm_positions:[mask_lm_position]}
+                mask_probs, last2 = sess.run([predict_prob, masked_logits], feed_dict=fd)
+                for mask_prob in mask_probs:
+                    mask_prob = mask_prob.tolist()
+                    max_num_index_list = map(mask_prob.index, heapq.nlargest(3, mask_prob))
+                    for i in max_num_index_list:
+                        words = token.id2vocab[i]
+                        if words in punc:
+                            continue
+                        new_query = [x for x in query]
+                        new_query.insert(insert_index-1, words)
+                        print("".join(new_query))
+                        out_f.write("".join(new_query) + "\n")
+                        # break
+                print('-' * 50)
+            pass
+            
+            # # 替换字符
+            # for i in range(len(query)):
+            #     insert_index = i + 1
+            #     print("index", insert_index)
+            #     word_ids[insert_index] = token.convert_tokens_to_ids(["[MASK]"])[0]
+            #     mask_lm_position = [insert_index]
+            #     word_mask = [1] * len(word_ids)
+            #     word_segment_ids = [0] * len(word_ids)
+            #     fd = {input_ids: [word_ids], input_mask: [word_mask], segment_ids: [word_segment_ids], masked_lm_positions:[mask_lm_position]}
+            #     mask_probs, last2 = sess.run([predict_prob, masked_logits], feed_dict=fd)
+            #     for mask_prob in mask_probs:
+            #         mask_prob = mask_prob.tolist()
+            #         max_num_index_list = map(mask_prob.index, heapq.nlargest(5, mask_prob))
+            #         for i in max_num_index_list:
+            #             words = token.id2vocab[i]
+            #             if words in punc or words in ['[UNK]']:
+            #                 continue
+            #             new_query = [x for x in query]
+            #             new_query[insert_index-1] = words
+            #             print("".join(new_query))
+            #             break
+            #     print('-' * 50)
+            #     pass
+        out_f.close()
