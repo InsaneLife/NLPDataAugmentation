@@ -114,7 +114,7 @@ if __name__ == "__main__":
 
         token = tokenization.CharTokenizer(vocab_file=bert_vocab_file)
         querys = read_file("data/input")
-        out_f = open("data/output", 'w')
+        out_f = open("data/bert_output", 'w')
         # query = '帮我查一下航班信息'
         # query = '查一下航班信息'
         # query = '附近有什么好玩的'

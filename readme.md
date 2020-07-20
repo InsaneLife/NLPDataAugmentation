@@ -32,8 +32,8 @@
 ```
 更多生成的结果查看 
 ```
-输入文件：./data/input
-生成句子输出：./data/output
+输入文件：[./data/input](./data/output)
+生成句子输出：[./data/output](./data/output)
 ```
 [eda](https://arxiv.org/abs/1901.11196)方法：
 

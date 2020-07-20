@@ -1,3 +1,7 @@
+# general
+.vscode/
+__pycache__/
+
 data/*
 !data/input
 !data/output
