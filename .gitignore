@@ -2,6 +2,6 @@
 .vscode/
 __pycache__/
 
-data/*
-!data/input
-!data/output
+# data/*
+# !data/input
+# !data/output
