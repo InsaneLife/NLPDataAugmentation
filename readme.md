@@ -4,7 +4,7 @@
 将[eda](https://arxiv.org/abs/1901.11196)中方法使用语言模型做增强，而非随机替换
 ## 随机插入
 
-> 见 bert_main.py
+> 见 [bert_main.py](./bert_main.py)
 
 将句子中随机选取位置插入词语，通过使用Bert来预测插入位置概率最大的词语。例如：
 
@@ -31,10 +31,9 @@
 附近近有什么好玩的
 ```
 更多生成的结果查看 
-```
-输入文件：[./data/input](./data/output)
-生成句子输出：[./data/output](./data/output)
-```
+
+> 输入文件：[./data/input](./data/output)
+> 生成句子输出：[./data/output](./data/output)
 [eda](https://arxiv.org/abs/1901.11196)方法：
 
 - synonym replacement(SR)：随机选取句子中n个非停用词的词语。对于每个词语随机选取它的一个同义词替换该词语。
@@ -50,7 +49,7 @@
 
 ## 词向量召回
 
-> 见 word_sim.py
+> 见 [word_sim.py](./word_sim.py)
 
 例如现有实体空调，需要召回空调的一些泛化说法、同义词等，召回同义词：
 
