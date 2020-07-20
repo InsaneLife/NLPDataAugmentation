@@ -11,7 +11,7 @@
 
 def read_file(file_p):
     out_arr = []
-    with open(file_p) as f:
+    with open(file_p, encoding='utf-8') as f:
         out_arr = [x.strip() for x in f.readlines()]
     return out_arr
 
