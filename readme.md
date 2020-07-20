@@ -39,6 +39,8 @@
 - random swap(RS)：随机选取两个词语，交换他们的位置，做n次。
 - random deletion(RD)：对于句子中的每个词语，以概率p选择删除。
 
+[eda中文](https://blog.csdn.net/shine19930820/article/details/103789604)
+
 # 词语丰富
 用于丰富ontology，针对词语进行丰富，包括：
 
