@@ -32,8 +32,8 @@
 ```
 更多生成的结果查看 
 
-> 输入文件：[./data/input](./data/output)
-> 生成句子输出：[./data/output](./data/output)
+> 输入文件：[./data/input](./data/input)
+> 生成句子输出：[./data/bert_output](./data/bert_output)
 [eda](https://arxiv.org/abs/1901.11196)方法：
 
 - synonym replacement(SR)：随机选取句子中n个非停用词的词语。对于每个词语随机选取它的一个同义词替换该词语。
