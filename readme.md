@@ -30,8 +30,8 @@
 附近最有什么好玩的
 附近近有什么好玩的
 ```
-更多生成的结果查看 
-> 生成句子输出：[./data/bert_output](./data/bert_output)
+更多生成的结果查看[./data/bert_output](./data/bert_output)
+
 [eda](https://arxiv.org/abs/1901.11196)方法：
 
 - synonym replacement(SR)：随机选取句子中n个非停用词的词语。对于每个词语随机选取它的一个同义词替换该词语。
