@@ -31,8 +31,6 @@
 附近近有什么好玩的
 ```
 更多生成的结果查看 
-
-> 输入文件：[./data/input](./data/input)
 > 生成句子输出：[./data/bert_output](./data/bert_output)
 [eda](https://arxiv.org/abs/1901.11196)方法：
 
