@@ -5,3 +5,4 @@ __pycache__/
 # data/*
 # !data/input
 # !data/output
+test.py
