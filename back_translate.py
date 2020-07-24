@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 '''
-@Time    :   2020/07/24 11:22:34
+@Time    :   2020/07/23 11:22:34
 @Author  :   Zhiyang.zzy 
 @Desc    :   
 '''
@@ -15,7 +15,6 @@ import urllib
 import random
 import json
 import time
-
 
 # 调用百度翻译API将中文翻译成英文
 def baidu_translate(ori_query: str, toLang='zh', fromLang='auto'):
@@ -60,7 +59,7 @@ def baidu_translate(ori_query: str, toLang='zh', fromLang='auto'):
 
 
 if __name__ == '__main__':
-    queries = '我要听忘情水'.split(",")
+    queries = '帮我查一下航班信息,查一下航班信息,附近有什么好玩的'.split(",")
     # 根据语言列表，可以翻译成多个句子, language: en,jp,kor,fra,spa,th,ara,ru,pt,de,it,el,nl,pl,bul,est,dan,fin,cs,rom,slo,swe,hu,cht,vie...
     for query in queries:
         out_arr = []
@@ -72,3 +71,4 @@ if __name__ == '__main__':
     # ['帮我查一下航班信息', '请帮我查一下飞机的情报。', '帮我检查航班信息。', '检查我的航班信息。', '检查航班', '查一下我的飞行记录。', '查一下我的航班信息。', '检查一下飞行资料', '检查飞行数据。', '帮我查一下航班信息。', '帮我查一下VOO信息', '帮我查一下航班数据。', '帮我查一下飞行记录。', '请查一下飞机的信息。', '幫我查一下班機資訊']
     # ['打听一下航班的信息。', '检查航班', '检查VOO信息', '查看航班信息', '检查飞行数据。', '四航班检查', '检查航班信息。', '航班信息验证', '查一下班機資訊', '请查一下飞机的信息。', '检查飞行信息', '检查航班信息']
     # ['这里有什么有趣的？', '这里有什么有趣的', '这个地方有什么有趣的？', '这里有什么好玩的？', '这里有什么好玩的', '这个地方有什么好玩的？', '发生什么事了？', '这附近有什么好玩的地方吗', '有什么有趣的？', '附近有什么好玩的吗？', '这附近有什么好玩的', '附近有什麼好玩的', '附近有什么有趣的东西吗？']
+
