@@ -84,3 +84,4 @@ wordNet:
 - https://github.com/jasonwei20/eda_nlp
 - https://ai.tencent.com/ailab/nlp/en/embedding.html
 - https://mp.weixin.qq.com/s/qmJdioUgqcahc_9RLn9vjw
+- Conditional BERT Contextual Augmentation
