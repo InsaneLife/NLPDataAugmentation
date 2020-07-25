@@ -6,3 +6,4 @@ __pycache__/
 # !data/input
 # !data/output
 test.py
+data/password

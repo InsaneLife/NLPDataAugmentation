@@ -26,7 +26,7 @@ def baidu_translate(ori_query: str, toLang='zh', fromLang='auto'):
     来源百度翻译api例子：http://api.fanyi.baidu.com/api/trans/product/apidoc
     """
     appid = '20200724000525424' # appid 需要在 https://api.fanyi.baidu.com/ 申请
-    secretKey = 'h3zgcJiXYgpEFzDuWjnM' # secretKey 需要在 https://api.fanyi.baidu.com/ 申请
+    secretKey = open("./data/password").readline().strip() # secretKey 需要在 https://api.fanyi.baidu.com/ 申请，这里我的key脱敏了
     query_arr = []
     # 休息一秒，降低调用频率
     time.sleep(1)
@@ -59,7 +59,7 @@ def baidu_translate(ori_query: str, toLang='zh', fromLang='auto'):
 
 
 if __name__ == '__main__':
-    queries = '帮我查一下航班信息,查一下航班信息,附近有什么好玩的'.split(",")
+    queries = '附近有什么好玩的'.split(",")
     # 根据语言列表，可以翻译成多个句子, language: en,jp,kor,fra,spa,th,ara,ru,pt,de,it,el,nl,pl,bul,est,dan,fin,cs,rom,slo,swe,hu,cht,vie...
     for query in queries:
         out_arr = []
