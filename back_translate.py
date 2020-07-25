@@ -25,8 +25,8 @@ def baidu_translate(ori_query: str, toLang='zh', fromLang='auto'):
     return: query_qrr: 翻译语句列表
     来源百度翻译api例子：http://api.fanyi.baidu.com/api/trans/product/apidoc
     """
-    appid = '20200724000525424' # appid 需要在 https://api.fanyi.baidu.com/ 申请
-    secretKey = open("./data/password").readline().strip() # secretKey 需要在 https://api.fanyi.baidu.com/ 申请，这里我的key脱敏了
+    appid = '20200724000525424' # appid 需要在 https://api.fanyi.baidu.com/ 申请， 请填写您的 appid
+    secretKey = open("./data/password").readline().strip() # secretKey 需要在 https://api.fanyi.baidu.com/ 申请，这里我的key脱敏了, 请填写您的key
     query_arr = []
     # 休息一秒，降低调用频率
     time.sleep(1)
