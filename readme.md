@@ -160,6 +160,7 @@ if __name__ == '__main__':
 
 
 # reference
+- https://blog.csdn.net/shine19930820/article/details/107649344
 - [EDA: Easy Data Augmentation Techniques for Boosting Performance on Text Classification Tasks](https://arxiv.org/abs/1901.11196)
 - https://github.com/jasonwei20/eda_nlp
 - https://ai.tencent.com/ailab/nlp/en/embedding.html
