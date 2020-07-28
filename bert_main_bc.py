@@ -62,39 +62,43 @@ def get_masked_lm_output(bert_config, input_tensor, output_weights, positions):
 
   return logits
 
-
-# nltk.download('wordnet')
-if __name__ == "__main__":
-    # 配置文件
+class BertAugmentor(object):
+    def __init__(self, model_dir, ):
+        self.bert_config_file = model_dir + 'bert_config.json'
+        self.init_checkpoint = model_dir + 'bert_model.ckpt'
+        # init_checkpoint = model_dir
+        self.bert_vocab_file = model_dir + 'vocab.txt'
+        self.bert_config = modeling.BertConfig.from_json_file(bert_config_file)
     
-    data_root = '/Volumes/HddData/ProjectData/NLP/bert/chinese_L-12_H-768_A-12/'
-    bert_config_file = data_root + 'bert_config.json'
-    init_checkpoint = data_root + 'bert_model.ckpt'
-    # init_checkpoint = data_root
-    bert_vocab_file = data_root + 'vocab.txt'
-    # bert_vocab_En_file = 'weight/uncased_L-12_H-768_A-12/vocab.txt'
-    bert_config = modeling.BertConfig.from_json_file(bert_config_file)
+    def build(self):
+        # placeholder
+        self.input_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_ids')
+        self.input_mask = tf.placeholder(tf.int32, shape=[None, None], name='input_masks')
+        self.segment_ids = tf.placeholder(tf.int32, shape=[None, None], name='segment_ids')
+        self.masked_lm_positions = tf.placeholder(tf.int32, shape=[None, None], name='masked_lm_positions')
 
-    # graph
-    input_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_ids')
-    input_mask = tf.placeholder(tf.int32, shape=[None, None], name='input_masks')
-    segment_ids = tf.placeholder(tf.int32, shape=[None, None], name='segment_ids')
-    masked_lm_positions = tf.placeholder(tf.int32, shape=[None, None], name='masked_lm_positions')
+        # 初始化BERT
+        self.model = modeling.BertModel(
+            config=self.bert_config,
+            is_training=False,
+            input_ids=self.input_ids,
+            input_mask=self.input_mask,
+            token_type_ids=self.segment_ids,
+            use_one_hot_embeddings=False)
+        
+        self.masked_logits = get_masked_lm_output(
+            self.bert_config, self.model.get_sequence_output(), self.model.get_embedding_table(),
+            self.masked_lm_positions)
+        self.predict_prob = tf.nn.softmax(self.masked_logits, axis=-1)
 
-    # 初始化BERT
-    model = modeling.BertModel(
-        config=bert_config,
-        is_training=False,
-        input_ids=input_ids,
-        input_mask=input_mask,
-        token_type_ids=segment_ids,
-        use_one_hot_embeddings=False)
+        # 加载bert模型
+        tvars = tf.trainable_variables()
+        (assignment, initialized_variable_names) = modeling.get_assignment_map_from_checkpoint(tvars, self.init_checkpoint)
+        tf.train.init_from_checkpoint(self.init_checkpoint, assignment)
 
 
-    masked_logits = get_masked_lm_output(
-         bert_config, model.get_sequence_output(), model.get_embedding_table(),
-         masked_lm_positions)
-    predict_prob = tf.nn.softmax(masked_logits, axis=-1)
+if __name__ == "__main__":
+    
 
      # 加载bert模型
     tvars = tf.trainable_variables()
