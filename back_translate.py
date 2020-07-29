@@ -62,7 +62,7 @@ def back_translate(query_arr):
     for query in query_arr:
         cur_arr = []
         # 根据语言列表，可以翻译成多个句子, language: en,jp,kor,fra,spa,th,ara,ru,pt,de,it,el,nl,pl,bul,est,dan,fin,cs,rom,slo,swe,hu,cht,vie...
-        lan_list = "en,jp,kor".split(",")
+        lan_list = "en,jp,kor,fra,spa,th,ara,ru,pt,de,it,el,nl,pl,bul,est,dan,fin,cs,rom,slo,swe,hu,cht,vie".split(",")
         for tmp_lan in lan_list:
             for tmp_q in baidu_translate(query, tmp_lan):
                 cur_arr.extend(baidu_translate(tmp_q, 'zh'))

@@ -17,7 +17,8 @@ import string
 import jieba
 from util import read_file
 from bert_modify import modeling as modeling, tokenization, optimization
-
+from collections import defaultdict
+print(tf.__version__)
 punc = string.punctuation + punctuation
 
 def gather_indexes(sequence_tensor, positions):
@@ -62,61 +63,61 @@ def get_masked_lm_output(bert_config, input_tensor, output_weights, positions):
 
   return logits
 
+class BertAugmentor(object):
+    def __init__(self, model_dir, n_best=3):
+        self.n_best = n_best
+        self.bert_config_file = model_dir + 'bert_config.json'
+        self.init_checkpoint = model_dir + 'bert_model.ckpt'
+        # init_checkpoint = model_dir
+        self.bert_vocab_file = model_dir + 'vocab.txt'
+        self.bert_config = modeling.BertConfig.from_json_file(self.bert_config_file)
+        self.token = tokenization.CharTokenizer(vocab_file=self.bert_vocab_file)
+        self.build()
+        self.build_sess()
 
-# nltk.download('wordnet')
-if __name__ == "__main__":
-    # 配置文件
+    def __del__(self):
+        self.close_sess()
     
-    data_root = '/Volumes/HddData/ProjectData/NLP/bert/chinese_L-12_H-768_A-12/'
-    bert_config_file = data_root + 'bert_config.json'
-    init_checkpoint = data_root + 'bert_model.ckpt'
-    # init_checkpoint = data_root
-    bert_vocab_file = data_root + 'vocab.txt'
-    # bert_vocab_En_file = 'weight/uncased_L-12_H-768_A-12/vocab.txt'
-    bert_config = modeling.BertConfig.from_json_file(bert_config_file)
+    def build(self):
+        # placeholder
+        self.input_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_ids')
+        self.input_mask = tf.placeholder(tf.int32, shape=[None, None], name='input_masks')
+        self.segment_ids = tf.placeholder(tf.int32, shape=[None, None], name='segment_ids')
+        self.masked_lm_positions = tf.placeholder(tf.int32, shape=[None, None], name='masked_lm_positions')
 
-    # graph
-    input_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_ids')
-    input_mask = tf.placeholder(tf.int32, shape=[None, None], name='input_masks')
-    segment_ids = tf.placeholder(tf.int32, shape=[None, None], name='segment_ids')
-    masked_lm_positions = tf.placeholder(tf.int32, shape=[None, None], name='masked_lm_positions')
+        # 初始化BERT
+        self.model = modeling.BertModel(
+            config=self.bert_config,
+            is_training=False,
+            input_ids=self.input_ids,
+            input_mask=self.input_mask,
+            token_type_ids=self.segment_ids,
+            use_one_hot_embeddings=False)
+        
+        self.masked_logits = get_masked_lm_output(
+            self.bert_config, self.model.get_sequence_output(), self.model.get_embedding_table(),
+            self.masked_lm_positions)
+        self.predict_prob = tf.nn.softmax(self.masked_logits, axis=-1)
 
-    # 初始化BERT
-    model = modeling.BertModel(
-        config=bert_config,
-        is_training=False,
-        input_ids=input_ids,
-        input_mask=input_mask,
-        token_type_ids=segment_ids,
-        use_one_hot_embeddings=False)
+        # 加载bert模型
+        tvars = tf.trainable_variables()
+        (assignment, initialized_variable_names) = modeling.get_assignment_map_from_checkpoint(tvars, self.init_checkpoint)
+        tf.train.init_from_checkpoint(self.init_checkpoint, assignment)
 
+    def build_sess(self):
+        self.sess = tf.Session()
+        self.sess.run(tf.global_variables_initializer())
+    
+    def close_sess(self):
+        self.sess.close()
 
-    masked_logits = get_masked_lm_output(
-         bert_config, model.get_sequence_output(), model.get_embedding_table(),
-         masked_lm_positions)
-    predict_prob = tf.nn.softmax(masked_logits, axis=-1)
-
-     # 加载bert模型
-    tvars = tf.trainable_variables()
-    (assignment, initialized_variable_names) = modeling.get_assignment_map_from_checkpoint(tvars, init_checkpoint)
-    tf.train.init_from_checkpoint(init_checkpoint, assignment)
-
-    # # 获取最后一层和倒数第二层。
-    # 改成读文件的方式
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-
-        token = tokenization.CharTokenizer(vocab_file=bert_vocab_file)
-        querys = read_file("data/input")
-        out_f = open("data/bert_output", 'w', encoding='utf-8')
-        # query = '帮我查一下航班信息'
-        # query = '查一下航班信息'
-        # query = '附近有什么好玩的'
-        for query in querys:
-            split_tokens = token.tokenize(query)
-            word_ids = token.convert_tokens_to_ids(split_tokens)
-            word_ids.insert(0, token.convert_tokens_to_ids(["[CLS]"])[0])
-            word_ids.append(token.convert_tokens_to_ids(["[SEP]"])[0])
+    def predict(self, queries):
+        out_map = defaultdict(list)
+        for query in queries:
+            split_tokens = self.token.tokenize(query)
+            word_ids = self.token.convert_tokens_to_ids(split_tokens)
+            word_ids.insert(0, self.token.convert_tokens_to_ids(["[CLS]"])[0])
+            word_ids.append(self.token.convert_tokens_to_ids(["[SEP]"])[0])
 
             # 分词
             index_arr = [0]
@@ -129,53 +130,37 @@ if __name__ == "__main__":
             # 插入字符
             for i in index_arr:
                 insert_index = i + 1
-                print("index", i)
-                word_ids.insert(insert_index, token.convert_tokens_to_ids(["[MASK]"])[0])
+                # print("index", i)
+                word_ids.insert(insert_index, self.token.convert_tokens_to_ids(["[MASK]"])[0])
                 mask_lm_position = [insert_index]
                 word_mask = [1] * len(word_ids)
                 word_segment_ids = [0] * len(word_ids)
-                fd = {input_ids: [word_ids], input_mask: [word_mask], segment_ids: [word_segment_ids], masked_lm_positions:[mask_lm_position]}
-                mask_probs, last2 = sess.run([predict_prob, masked_logits], feed_dict=fd)
+                fd = {self.input_ids: [word_ids], self.input_mask: [word_mask], self.segment_ids: [word_segment_ids], self.masked_lm_positions:[mask_lm_position]}
+                mask_probs = self.sess.run(self.predict_prob, feed_dict=fd)
                 for mask_prob in mask_probs:
                     mask_prob = mask_prob.tolist()
-                    max_num_index_list = map(mask_prob.index, heapq.nlargest(3, mask_prob))
+                    max_num_index_list = map(mask_prob.index, heapq.nlargest(self.n_best, mask_prob))
                     for i in max_num_index_list:
-                        words = token.id2vocab[i]
+                        words = self.token.id2vocab[i]
                         if words in punc:
                             continue
                         new_query = [x for x in query]
                         new_query.insert(insert_index-1, words)
-                        print("".join(new_query))
-                        out_f.write("".join(new_query) + "\n")
-                        # break
-                print('-' * 50)
+                        # print("".join(new_query))
+                        out_map[query].append("".join(new_query))
             pass
-            
-            # # 替换字符
-            # for i in range(len(query)):
-            #     insert_index = i + 1
-            #     print("index", insert_index)
-            #     word_ids[insert_index] = token.convert_tokens_to_ids(["[MASK]"])[0]
-            #     mask_lm_position = [insert_index]
-            #     word_mask = [1] * len(word_ids)
-            #     word_segment_ids = [0] * len(word_ids)
-            #     fd = {input_ids: [word_ids], input_mask: [word_mask], segment_ids: [word_segment_ids], masked_lm_positions:[mask_lm_position]}
-            #     mask_probs, last2 = sess.run([predict_prob, masked_logits], feed_dict=fd)
-            #     for mask_prob in mask_probs:
-            #         mask_prob = mask_prob.tolist()
-            #         max_num_index_list = map(mask_prob.index, heapq.nlargest(5, mask_prob))
-            #         for i in max_num_index_list:
-            #             words = token.id2vocab[i]
-            #             if words in punc or words in ['[UNK]']:
-            #                 continue
-            #             new_query = [x for x in query]
-            #             new_query[insert_index-1] = words
-            #             print("".join(new_query))
-            #             break
-            #     print('-' * 50)
-            #     pass
-        out_f.close()
+        return out_map
 
+if __name__ == "__main__":
+    # bert 模型下载地址
+    model_dir = '/Volumes/HddData/ProjectData/NLP/bert/chinese_L-12_H-768_A-12/'
+    # query输入文件，每个query一行
+    queries = read_file("data/input")
+    mask_model = BertAugmentor(model_dir)
+    result = mask_model.predict(queries)
+    print("Augmentor's result:", result)
+    # 写出到文件
+    with open("data/bert_output", 'w', encoding='utf-8') as out:
+        for query, v in result.items():
+            out.write("{}\t{}\n".format(query, ';'.join(v)))
 
-# if __name__ == "__main__":
-#     pass

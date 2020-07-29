@@ -157,7 +157,12 @@ if __name__ == '__main__':
 这篇文章也提出了使用word2vec来召回同义词，做同义词替换。
 
 
-
+# requirement
+python3, 
+> pip install -r requirement.txt
+word embedding file:
+https://storage.googleapis.com/bert_models/2018_11_03/chinese_L-12_H-768_A-12.zip
+https://ai.tencent.com/ailab/nlp/en/data/Tencent_AILab_ChineseEmbedding.tar.gz
 
 # reference
 - https://blog.csdn.net/shine19930820/article/details/107649344
