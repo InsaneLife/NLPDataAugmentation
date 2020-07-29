@@ -17,6 +17,7 @@ import string
 import jieba
 from util import read_file
 from bert_modify import modeling as modeling, tokenization, optimization
+from collections import defaultdict
 
 punc = string.punctuation + punctuation
 
@@ -63,12 +64,16 @@ def get_masked_lm_output(bert_config, input_tensor, output_weights, positions):
   return logits
 
 class BertAugmentor(object):
-    def __init__(self, model_dir, ):
+    def __init__(self, model_dir, n_best=3):
+        self.n_best = n_best
         self.bert_config_file = model_dir + 'bert_config.json'
         self.init_checkpoint = model_dir + 'bert_model.ckpt'
         # init_checkpoint = model_dir
         self.bert_vocab_file = model_dir + 'vocab.txt'
-        self.bert_config = modeling.BertConfig.from_json_file(bert_config_file)
+        self.bert_config = modeling.BertConfig.from_json_file(self.bert_config_file)
+        self.token = tokenization.CharTokenizer(vocab_file=self.bert_vocab_file)
+        self.build()
+        self.build_sess()
     
     def build(self):
         # placeholder
@@ -96,6 +101,54 @@ class BertAugmentor(object):
         (assignment, initialized_variable_names) = modeling.get_assignment_map_from_checkpoint(tvars, self.init_checkpoint)
         tf.train.init_from_checkpoint(self.init_checkpoint, assignment)
 
+
+
+    def build_sess(self):
+        self.sess = tf.Session()
+        sess.run(tf.global_variables_initializer())
+    
+    def close_sess(self):
+        self.sess.close()
+
+    def predict(self, queries):
+        out_map = defaultdict(list)
+        for query in queries:
+            split_tokens = self.token.tokenize(query)
+            word_ids = token.convert_tokens_to_ids(split_tokens)
+            word_ids.insert(0, token.convert_tokens_to_ids(["[CLS]"])[0])
+            word_ids.append(token.convert_tokens_to_ids(["[SEP]"])[0])
+
+            # 分词
+            index_arr = [0]
+            seg_list = jieba.cut(query, cut_all=False)
+            i = 0
+            for each in seg_list:
+                i += len(each)
+                index_arr.append(i)
+
+            # 插入字符
+            for i in index_arr:
+                insert_index = i + 1
+                print("index", i)
+                word_ids.insert(insert_index, token.convert_tokens_to_ids(["[MASK]"])[0])
+                mask_lm_position = [insert_index]
+                word_mask = [1] * len(word_ids)
+                word_segment_ids = [0] * len(word_ids)
+                fd = {self.input_ids: [word_ids], self.input_mask: [word_mask], self.segment_ids: [word_segment_ids], self.masked_lm_positions:[mask_lm_position]}
+                mask_probs = sess.run(self.predict_prob, feed_dict=fd)
+                for mask_prob in mask_probs:
+                    mask_prob = mask_prob.tolist()
+                    max_num_index_list = map(mask_prob.index, heapq.nlargest(self.n_best, mask_prob))
+                    for i in max_num_index_list:
+                        words = token.id2vocab[i]
+                        if words in punc:
+                            continue
+                        new_query = [x for x in query]
+                        new_query.insert(insert_index-1, words)
+                        print("".join(new_query))
+                        out_map[query].append("".join(new_query))
+            pass
+        return out_map
 
 if __name__ == "__main__":
     
