@@ -1,3 +1,16 @@
+#!/usr/bin/env python
+#encoding=utf-8
+'''
+@Time    :   2020/07/31 23:54:50
+@Author  :   zhiyang.zzy 
+@Contact :   zhiyangchou@gmail.com
+@Desc    :   来源于：
+todo: 中文停用词
+更多的同义词召回方法
+'''
+
+# here put the import lib
+
 # Easy data augmentation techniques for text classification
 # Jason Wei and Kai Zou
 
