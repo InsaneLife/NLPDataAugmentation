@@ -7,6 +7,7 @@
 @Desc    :   来源于：
 todo: 中文停用词
 更多的同义词召回方法
+停用词：https://github.com/goto456/stopwords
 '''
 
 # here put the import lib
@@ -16,30 +17,12 @@ todo: 中文停用词
 
 import random
 from random import shuffle
+import util
 random.seed(1)
 
-#stop words list
-stop_words = ['i', 'me', 'my', 'myself', 'we', 'our', 
-			'ours', 'ourselves', 'you', 'your', 'yours', 
-			'yourself', 'yourselves', 'he', 'him', 'his', 
-			'himself', 'she', 'her', 'hers', 'herself', 
-			'it', 'its', 'itself', 'they', 'them', 'their', 
-			'theirs', 'themselves', 'what', 'which', 'who', 
-			'whom', 'this', 'that', 'these', 'those', 'am', 
-			'is', 'are', 'was', 'were', 'be', 'been', 'being', 
-			'have', 'has', 'had', 'having', 'do', 'does', 'did',
-			'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or',
-			'because', 'as', 'until', 'while', 'of', 'at', 
-			'by', 'for', 'with', 'about', 'against', 'between',
-			'into', 'through', 'during', 'before', 'after', 
-			'above', 'below', 'to', 'from', 'up', 'down', 'in',
-			'out', 'on', 'off', 'over', 'under', 'again', 
-			'further', 'then', 'once', 'here', 'there', 'when', 
-			'where', 'why', 'how', 'all', 'any', 'both', 'each', 
-			'few', 'more', 'most', 'other', 'some', 'such', 'no', 
-			'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 
-			'very', 's', 't', 'can', 'will', 'just', 'don', 
-			'should', 'now', '']
+#使用中文的停用词，这里使用百度的，更多见 "./data/stopwords/"
+
+stop_words = util.read_file("./data/stopwords/baidu_stopwords.txt")
 
 #cleaning up text
 import re
