@@ -4,9 +4,9 @@
 @Time    :   2020/07/31 23:54:50
 @Author  :   zhiyang.zzy 
 @Contact :   zhiyangchou@gmail.com
-@Desc    :   来源于：
-todo: 中文停用词
-更多的同义词召回方法
+@Desc    :   来源于：https://github.com/jasonwei20/eda_nlp, 原版本适用于英文，这里根据中文做了修改。
+todo: 
+1. 更多的同义词召回方法
 停用词：https://github.com/goto456/stopwords
 '''
 
