@@ -10,6 +10,7 @@
 通过WrodNet中的同义词召回相近似的词语，见
 
 ```python
+import nltk
 from nltk.corpus import wordnet
 nltk.download('omw')
 word = "空调"

@@ -23,3 +23,5 @@ ap.add_argument("--output", required=False, type=str, help="output file of unaug
 ap.add_argument("--num_aug", required=False, type=int, help="number of augmented sentences per original sentence")
 ap.add_argument("--alpha", required=False, type=float, help="percent of words in each sentence to be changed")
 args = ap.parse_args()
+
+
