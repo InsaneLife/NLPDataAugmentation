@@ -140,7 +140,9 @@ if __name__ == '__main__':
 > 由于随机替换、交换、删除会让原本序列化的句子的序列变得不重要，模型更关注某些词语是否出现，增加模型误识别风险。
 
 对原[EDA](https://arxiv.org/abs/1901.11196)针对中文做了一些修改，主要是修改为中文停用词，同义词召回使用WordNet/synonyms/词向量召回。
+
 完整中文代码见：[eda_chinese.py](./eda_chinese.py)
+
 [eda](https://arxiv.org/abs/1901.11196)的四种方法：
 - synonym replacement(SR)：随机选取句子中n个非停用词的词语。对于每个词语随机选取它的一个同义词替换该词语。
 - random insertion(RI)：随机选取句子中的一个非停用词的词语，随机选取这个词语的一个近义词，将近义词随机插入到句子中，做n次。
