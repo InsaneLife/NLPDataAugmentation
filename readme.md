@@ -60,7 +60,6 @@ print(w2v_model.similar_by_word(word)[:10])
 
 ## 生成方法
 
-> 见 [bert_main.py](./bert_main.py)
 看过很多奇奇怪怪的生成方法，有seq2seq([shin2019utterance](https://ieeexplore.ieee.org/abstract/document/8625384/), [kurata2016labeled](https://www.isca-speech.org/archive/Interspeech_2016/pdfs/0727.PDF), [kurata2016labeled](https://www.isca-speech.org/archive/Interspeech_2016/pdfs/0727.PDF?cm_mc_uid=92085802250714671469934&cm_mc_sid_50200000=1475548151))、VAE([yoo2020variational](https://arxiv.org/abs/2001.08604),[xie2019unsupervised](https://arxiv.org/abs/1904.12848))等方法，个人觉得和任务耦合，不太具备通用性，反倒是借助语言模型来做生成比较靠谱。
 
 > 主要参考[Context Augmentation](https://arxiv.org/pdf/1805.06201.pdf)，通过Bi-LSTM训练语言模型，并且加入了数据label来控制生成。
@@ -102,7 +101,12 @@ print(w2v_model.similar_by_word(word)[:10])
 附近最有什么好玩的
 附近近有什么好玩的
 ```
-更多生成的结果查看[./data/bert_output](./data/bert_output)
+
+代码见 [bert_main.py](./bert_main.py) 
+> [中文bert模型下载](https://github.com/InsaneLife/ChineseNLPCorpus#bert)
+> 
+> 更多生成的结果查看[./data/bert_output](./data/bert_output)
+
 
 # 回译
 通过将目标句子翻译为外语，然后将外语翻译成中文，翻译一般会重新组织句子结构，所以增强后的数据具备一定的句式丰富性，下面是使用了[百度翻译api](http://api.fanyi.baidu.com/api/trans/product/apidoc)的结果。

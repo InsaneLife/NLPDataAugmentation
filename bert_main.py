@@ -152,12 +152,14 @@ class BertAugmentor(object):
         return out_map
 
 if __name__ == "__main__":
-    # bert 模型下载地址
+    # bert 模型下载地址，中文bert下载链接：https://github.com/InsaneLife/ChineseNLPCorpus#%E9%A2%84%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8For%E6%A8%A1%E5%9E%8B
     model_dir = '/Volumes/HddData/ProjectData/NLP/bert/chinese_L-12_H-768_A-12/'
     # query输入文件，每个query一行
     queries = read_file("data/input")
     mask_model = BertAugmentor(model_dir)
+    # 随机插入：通过随机插入mask，预测可能的词语
     result = mask_model.predict(queries)
+    # 随机替换：通过随机mask掉词语，预测可能的值。
     print("Augmentor's result:", result)
     # 写出到文件
     with open("data/bert_output", 'w', encoding='utf-8') as out:
