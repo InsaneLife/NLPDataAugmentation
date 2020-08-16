@@ -5,6 +5,10 @@
 @Author  :   zhiyang.zzy 
 @Contact :   zhiyangchou@gmail.com
 @Desc    :   
+1. 随机插入mask，使用bert来生成 mask 的内容，来丰富句子
+2. 随机将某些词语mask，使用bert来生成 mask 的内容。
+    - 使用贪心算法，每次最优。
+    - beam search方法，每次保留最优的前beams个，。
 '''
 
 # here put the import lib
