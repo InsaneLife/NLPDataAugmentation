@@ -132,7 +132,7 @@ class BertAugmentor(object):
         self.sess.close()
 
     def predict_single_mask(self, word_ids, mask_index, beam_num, prob):
-        """输入一个句子token list，对其中第mask_index个的mask的可能内容，返回beam_num个候选词语，以及prob"""
+        """输入一个句子token id list，对其中第mask_index个的mask的可能内容，返回beam_num个候选词语，以及prob"""
         word_ids_out = []
         word_mask = [1] * len(word_ids)
         word_segment_ids = [0] * len(word_ids)
@@ -147,6 +147,10 @@ class BertAugmentor(object):
                 cur_word_ids[mask_index] = i
                 word_ids_out.append(cur_word_ids)
         return word_ids_out
+
+    def gen_sen(self, ):
+        """输入是一个word list, 其中包含mask，对mask生产对应的词语。"""
+        pass
 
     def word_replace(self, query):
         """随机将某些词语mask，使用bert来生成 mask 的内容。"""
