@@ -82,8 +82,10 @@ class BertAugmentor(object):
         self.bert_config = modeling.BertConfig.from_json_file(
             self.bert_config_file)
         # token策略，由于是中文，使用了token分割，同时对于数字和英文使用char分割。
-        self.token = tokenization.CharTokenizer(
-            vocab_file=self.bert_vocab_file)
+        self.token = tokenization.CharTokenizer(vocab_file=self.bert_vocab_file)
+        self.mask_id = self.token.convert_tokens_to_ids(["[MASK]"])[0]
+        self.cls_id = self.token.convert_tokens_to_ids(["[CLS]"])[0]
+        self.sep_id = self.token.convert_tokens_to_ids(["[SEP]"])[0]
         # 构图
         self.build()
         # sess init
@@ -131,7 +133,7 @@ class BertAugmentor(object):
     def close_sess(self):
         self.sess.close()
 
-    def predict_single_mask(self, word_ids, mask_index, beam_num, prob):
+    def predict_single_mask(self, word_ids:list, mask_index:int, beam_num:int, prob:float=0.5):
         """输入一个句子token id list，对其中第mask_index个的mask的可能内容，返回beam_num个候选词语，以及prob"""
         word_ids_out = []
         word_mask = [1] * len(word_ids)
@@ -146,19 +148,47 @@ class BertAugmentor(object):
                 cur_word_ids = word_ids.copy()
                 cur_word_ids[mask_index] = i
                 word_ids_out.append(cur_word_ids)
-        return word_ids_out
+        return word_ids_out[:beam_num]
 
-    def gen_sen(self, ):
-        """输入是一个word list, 其中包含mask，对mask生产对应的词语。"""
+    def gen_sen(self, word_ids:list, indexes:list, beam_num:int):
+        """输入是一个word id list, 其中包含mask，对mask生产对应的词语。"""
+        out_arr = []
+        for i, index_ in enumerate(indexes):
+            if i == 0:
+                out_arr = self.predict_single_mask(word_ids, index_, beam_num)
+            else:
+                tmp_arr = out_arr.copy()
+                out_arr = []
+                for word_ids_ in tmp_arr:
+                    cur_arr = self.predict_single_mask(word_ids_, index_, beam_num)
+                    out_arr.extend(cur_arr)
+            # out_arr = out_arr[:beam_num]
+        for i, each in enumerate(out_arr):
+            query_ = [self.token.id2vocab[x] for x in each]
+            out_arr[i] = query_
+        return out_arr
         pass
 
     def word_replace(self, query):
         """随机将某些词语mask，使用bert来生成 mask 的内容。"""
-        seg_list = jieba.cut(query, cut_all=False)
-        # 随机选择非停用词mask。
-        for each in seg_list:
-            i += len(each)
-            index_arr.append(i)
+        # seg_list = jieba.cut(query, cut_all=False)
+        # # 随机选择非停用词mask。
+        # i = 0
+        # for each in seg_list:
+        #     i += len(each)
+        #     index_arr.append(i)
+        # query转id
+        split_tokens = self.token.tokenize(query)
+        word_ids = self.token.convert_tokens_to_ids(split_tokens)
+        word_ids.insert(0, self.cls_id)
+        word_ids.append(self.sep_id)
+        # 随机insert两个字符
+        word_ids.insert(1, self.mask_id)
+        word_ids.insert(1, self.mask_id)
+        word_ids.insert(1, self.mask_id)
+
+        out_arr= self.gen_sen(word_ids, indexes=[1, 2], beam_num=5)
+
         pass
 
     def predict(self, queries):
@@ -182,7 +212,7 @@ class BertAugmentor(object):
                 insert_index = i + 1
                 # print("index", i)
                 word_ids.insert(
-                    insert_index, self.token.convert_tokens_to_ids(["[MASK]"])[0])
+                    insert_index, self.mask_id)
                 mask_lm_position = [insert_index]
                 word_mask = [1] * len(word_ids)
                 word_segment_ids = [0] * len(word_ids)
@@ -211,11 +241,11 @@ if __name__ == "__main__":
     model_dir = '/Volumes/HddData/ProjectData/NLP/bert/chinese_L-12_H-768_A-12/'
     # query输入文件，每个query一行
     queries = read_file("data/input")
-    mask_model = BertAugmentor(model_dir)
-    mask_model.
-    # 随机插入：通过随机插入mask，预测可能的词语
-    result = mask_model.predict(queries)
+    mask_model = BertAugmentor(model_dir, n_best=2)
     # 随机替换：通过随机mask掉词语，预测可能的值。
+    replace_result = mask_model.word_replace(queries[0])
+    # 随机插入：通过随机插入mask，预测可能的词语, todo: 将随机插入变为beam search
+    result = mask_model.predict(queries)
     print("Augmentor's result:", result)
     # 写出到文件
     with open("data/bert_output", 'w', encoding='utf-8') as out:
