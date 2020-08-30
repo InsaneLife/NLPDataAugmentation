@@ -212,7 +212,7 @@ if __name__ == "__main__":
     # query输入文件，每个query一行
     queries = read_file("data/input")
     mask_model = BertAugmentor(model_dir)
-    mask_model.
+    # mask_model.
     # 随机插入：通过随机插入mask，预测可能的词语
     result = mask_model.predict(queries)
     # 随机替换：通过随机mask掉词语，预测可能的值。
