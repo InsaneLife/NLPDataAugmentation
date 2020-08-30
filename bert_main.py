@@ -169,20 +169,20 @@ class BertAugmentor(object):
         return out_arr
         pass
 
-    def word_replace(self, query):
+    def word_insert(self, query):
         """随机将某些词语mask，使用bert来生成 mask 的内容。"""
-        # seg_list = jieba.cut(query, cut_all=False)
-        # # 随机选择非停用词mask。
-        # i = 0
-        # for each in seg_list:
-        #     i += len(each)
-        #     index_arr.append(i)
+        seg_list = jieba.cut(query, cut_all=False)
+        # 随机选择非停用词mask。
+        i, index_arr = 1, [1]
+        for each in seg_list:
+            i += len(each)
+            index_arr.append(i)
         # query转id
         split_tokens = self.token.tokenize(query)
         word_ids = self.token.convert_tokens_to_ids(split_tokens)
         word_ids.insert(0, self.cls_id)
         word_ids.append(self.sep_id)
-        # 随机insert两个字符
+        # 随机insert n 个字符, 1<=n<=3
         word_ids.insert(1, self.mask_id)
         word_ids.insert(1, self.mask_id)
         word_ids.insert(1, self.mask_id)
@@ -242,8 +242,8 @@ if __name__ == "__main__":
     # query输入文件，每个query一行
     queries = read_file("data/input")
     mask_model = BertAugmentor(model_dir, n_best=2)
-    # 随机替换：通过随机mask掉词语，预测可能的值。
-    replace_result = mask_model.word_replace(queries[0])
+    # todo: 随机替换：通过随机mask掉词语，预测可能的值。
+    insert_result = mask_model.word_insert(queries[0])
     # 随机插入：通过随机插入mask，预测可能的词语, todo: 将随机插入变为beam search
     result = mask_model.predict(queries)
     print("Augmentor's result:", result)
