@@ -187,7 +187,7 @@ class BertAugmentor(object):
         word_ids.insert(1, self.mask_id)
         word_ids.insert(1, self.mask_id)
 
-        out_arr= self.gen_sen(word_ids, indexes=[1, 2], beam_num=5)
+        out_arr= self.gen_sen(word_ids, indexes=[1, 2, 3], beam_num=5)
 
         pass
 
