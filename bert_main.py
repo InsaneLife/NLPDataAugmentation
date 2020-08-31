@@ -19,7 +19,7 @@ import heapq
 from zhon.hanzi import punctuation
 import string
 import jieba
-import copy
+import numpy as np
 from util import read_file
 from bert_modify import modeling as modeling, tokenization, optimization
 from collections import defaultdict
@@ -169,8 +169,9 @@ class BertAugmentor(object):
         return out_arr
         pass
 
-    def word_insert(self, query):
+    def word_insert(self, query, beam_num=5):
         """随机将某些词语mask，使用bert来生成 mask 的内容。"""
+        out_arr = []
         seg_list = jieba.cut(query, cut_all=False)
         # 随机选择非停用词mask。
         i, index_arr = 1, [1]
@@ -182,17 +183,29 @@ class BertAugmentor(object):
         word_ids = self.token.convert_tokens_to_ids(split_tokens)
         word_ids.insert(0, self.cls_id)
         word_ids.append(self.sep_id)
+        word_ids_arr, word_index_arr = [], []
         # 随机insert n 个字符, 1<=n<=3
         for index_ in index_arr:
             insert_num = np.random.randint(1, 4)
             word_ids_ = word_ids.copy()
+            word_index = []
             for i in range(insert_num):
                 word_ids_.insert(index_, self.mask_id)
-           
-
-        out_arr= self.gen_sen(word_ids, indexes=[1, 2, 3], beam_num=5)
-
-        pass
+                word_index.append(index_ + i)
+            word_ids_arr.append(word_ids_)
+            word_index_arr.append(word_index)
+        for word_ids, word_index in zip(word_ids_arr, word_index_arr):
+            arr_ = self.gen_sen(word_ids, indexes=word_index, beam_num=beam_num)
+            out_arr.extend(arr_)
+            pass
+        out_arr = ["".join(x[1:-1]) for x in out_arr]
+        return out_arr
+    
+    def insert_word2queries(self, queries:list, beam_num=5):
+        out_map = defaultdict(list)
+        for query in queries:
+            out_map[query] = self.word_insert(query, beam_num)
+        return out_map
 
     def predict(self, queries):
         out_map = defaultdict(list)
@@ -246,9 +259,9 @@ if __name__ == "__main__":
     queries = read_file("data/input")
     mask_model = BertAugmentor(model_dir, n_best=2)
     # todo: 随机替换：通过随机mask掉词语，预测可能的值。
-    insert_result = mask_model.word_insert(queries[0])
+    # insert_result = mask_model.insert_word2queries(queries)
     # 随机插入：通过随机插入mask，预测可能的词语, todo: 将随机插入变为beam search
-    result = mask_model.predict(queries)
+    result = mask_model.insert_word2queries(queries)
     print("Augmentor's result:", result)
     # 写出到文件
     with open("data/bert_output", 'w', encoding='utf-8') as out:
