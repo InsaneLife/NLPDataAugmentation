@@ -183,9 +183,12 @@ class BertAugmentor(object):
         word_ids.insert(0, self.cls_id)
         word_ids.append(self.sep_id)
         # 随机insert n 个字符, 1<=n<=3
-        word_ids.insert(1, self.mask_id)
-        word_ids.insert(1, self.mask_id)
-        word_ids.insert(1, self.mask_id)
+        for index_ in index_arr:
+            insert_num = np.random.randint(1, 4)
+            word_ids_ = word_ids.copy()
+            for i in range(insert_num):
+                word_ids_.insert(index_, self.mask_id)
+           
 
         out_arr= self.gen_sen(word_ids, indexes=[1, 2, 3], beam_num=5)
 
