@@ -266,6 +266,6 @@ if __name__ == "__main__":
     result = mask_model.insert_word2queries(queries)
     print("Augmentor's result:", result)
     # 写出到文件
-    with open("data/bert_output", 'w', encoding='utf-8') as out:
+    with open("data/bert_insert", 'w', encoding='utf-8') as out:
         for query, v in result.items():
             out.write("{}\t{}\n".format(query, ';'.join(v)))
