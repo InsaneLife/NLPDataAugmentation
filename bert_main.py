@@ -147,7 +147,7 @@ class BertAugmentor(object):
             for i in max_num_index_list:
                 cur_word_ids = word_ids.copy()
                 cur_word_ids[mask_index] = i
-                word_ids_out.append(cur_word_ids)
+                word_ids_out.append([cur_word_ids, mask_prob[i]])
         return word_ids_out[:beam_num]
 
     def gen_sen(self, word_ids:list, indexes:list, beam_num:int):
@@ -159,13 +159,14 @@ class BertAugmentor(object):
             else:
                 tmp_arr = out_arr.copy()
                 out_arr = []
-                for word_ids_ in tmp_arr:
+                for word_ids_, prob in tmp_arr:
                     cur_arr = self.predict_single_mask(word_ids_, index_, beam_num)
+                    cur_arr = [[x[0], x[1] * prob] for x in cur_arr]
                     out_arr.extend(cur_arr)
             # out_arr = out_arr[:beam_num]
-        for i, each in enumerate(out_arr):
+        for i, (each, _) in enumerate(out_arr):
             query_ = [self.token.id2vocab[x] for x in each]
-            out_arr[i] = query_
+            out_arr[i][0] = query_
         return out_arr
         pass
 
@@ -198,7 +199,8 @@ class BertAugmentor(object):
             arr_ = self.gen_sen(word_ids, indexes=word_index, beam_num=beam_num)
             out_arr.extend(arr_)
             pass
-        out_arr = ["".join(x[1:-1]) for x in out_arr]
+        out_arr = sorted(out_arr, key=lambda x: x[1], reverse=True)
+        out_arr = ["".join(x[0][1:-1]) for x in out_arr[:beam_num]]
         return out_arr
     
     def insert_word2queries(self, queries:list, beam_num=5):
