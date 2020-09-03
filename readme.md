@@ -95,8 +95,7 @@ print(w2v_model.similar_by_word(word)[:10])
 代码见 [bert_main.py](./bert_main.py) 
 > [中文bert模型下载](https://github.com/InsaneLife/ChineseNLPCorpus#bert)
 > 
-> 更多生成的结果查看[./data/bert_output](./data/bert_output)
-
+> 更多生成的结果查看[./data/bert_insert](./data/bert_output)、[./data/bert_replace](./data/bert_output)
 
 # 回译
 通过将目标句子翻译为外语，然后将外语翻译成中文，翻译一般会重新组织句子结构，所以增强后的数据具备一定的句式丰富性，下面是使用了[百度翻译api](http://api.fanyi.baidu.com/api/trans/product/apidoc)的结果。
