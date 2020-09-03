@@ -259,11 +259,11 @@ if __name__ == "__main__":
     model_dir = '/Volumes/HddData/ProjectData/NLP/bert/chinese_L-12_H-768_A-12/'
     # query输入文件，每个query一行
     queries = read_file("data/input")
-    mask_model = BertAugmentor(model_dir, n_best=2)
+    mask_model = BertAugmentor(model_dir, n_best=5)
     # todo: 随机替换：通过随机mask掉词语，预测可能的值。
     # insert_result = mask_model.insert_word2queries(queries)
     # 随机插入：通过随机插入mask，预测可能的词语, todo: 将随机插入变为beam search
-    result = mask_model.insert_word2queries(queries)
+    result = mask_model.insert_word2queries(queries, beam_num=10)
     print("Augmentor's result:", result)
     # 写出到文件
     with open("data/bert_insert", 'w', encoding='utf-8') as out:
