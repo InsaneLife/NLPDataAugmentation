@@ -16,10 +16,12 @@ import nltk
 import tensorflow as tf
 # from transformers import *
 import heapq
+from tensorflow.python.ops.gen_math_ops import mod
 from zhon.hanzi import punctuation
 import string
 import jieba
 import numpy as np
+import sys
 from util import read_file
 from bert_modify import modeling as modeling, tokenization, optimization
 from collections import defaultdict
@@ -295,24 +297,37 @@ class BertAugmentor(object):
         out_queries = [["".join(x[0]), x[1]] for x in out_queries]
         return out_queries
 
-
-if __name__ == "__main__":
-    # bert 模型下载地址，中文bert下载链接：https://github.com/InsaneLife/ChineseNLPCorpus#%E9%A2%84%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8For%E6%A8%A1%E5%9E%8B
-    model_dir = '/Volumes/HddData/ProjectData/NLP/bert/chinese_L-12_H-768_A-12/'
+def augment(file_, model_dir=None):
+    """ 
+    file_: 输入文件，每行是一个query
+    model_dir: bert 预训练模型地址，中文bert下载链接：https://github.com/InsaneLife/ChineseNLPCorpus#%E9%A2%84%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8For%E6%A8%A1%E5%9E%8B
+    """
+    if not model_dir:
+        raise Exception("must feed params:[model_dir]")
     # query输入文件，每个query一行
-    queries = read_file("data/input")
+    queries = read_file(file_)
     mask_model = BertAugmentor(model_dir)
-    # bert 预测 mask
-    out_queries = mask_model.predict(["[MASK]", "[MASK]", "卖", "账", "号", "吗"], beam_size=5)
     # 随机替换：通过随机mask掉词语，预测可能的值。
     replace_result = mask_model.replace_word2queries(queries, beam_size=20)
-    with open("data/bert_replace", 'w', encoding='utf-8') as out:
+    with open(file_ + ".augment.bert_replace", 'w', encoding='utf-8') as out:
         for query, v in replace_result.items():
             out.write("{}\t{}\n".format(query, ';'.join(v)))
     # 随机插入：通过随机插入mask，预测可能的词语
     insert_result = mask_model.insert_word2queries(queries, beam_size=20)
     print("Augmentor's result:", insert_result)
     # 写出到文件
-    with open("data/bert_insert", 'w', encoding='utf-8') as out:
+    with open(file_ + ".augment.bert_insert", 'w', encoding='utf-8') as out:
         for query, v in insert_result.items():
             out.write("{}\t{}\n".format(query, ';'.join(v)))
+    
+    # bert 预测 mask
+    out_queries = mask_model.predict(["[MASK]", "[MASK]", "卖", "账", "号", "吗"], beam_size=5)
+    pass
+
+
+if __name__ == "__main__":
+    # bert 模型下载地址，中文bert下载链接：https://github.com/InsaneLife/ChineseNLPCorpus#%E9%A2%84%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8For%E6%A8%A1%E5%9E%8B
+    model_dir = '/Volumes/HddData/ProjectData/NLP/bert/chinese_L-12_H-768_A-12/'
+    # query输入文件，每个query一行
+    augment("data/input", model_dir=model_dir)
+    

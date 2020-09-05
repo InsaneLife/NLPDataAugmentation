@@ -12,6 +12,7 @@ todo: 将各中增强方法在此汇合和使用，输入文件，输出为各�
 import argparse
 import util
 import eda_chinese as eda
+import back_translate as bt
 
 
 
@@ -20,13 +21,11 @@ class Augmentor(object):
     def __init__(self,):
         pass
 
-    def augment(self, file_, out_file):
-        queries = util.read_file(file_)
-        result = eda.augment()
-        # 写出到文件 
-        with open(out_file, 'w', encoding='utf-8') as out:
-            for query, v in result.items():
-                out.write("{}\t{}\n".format(query, ';'.join(v)))
+    def augment(self, file_):
+        # ead
+        eda.augment(file_)
+        # back translate
+        bt.augment(file_)
         pass
 
 

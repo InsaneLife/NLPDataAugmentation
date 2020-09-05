@@ -69,8 +69,11 @@ def back_translate(query_arr):
         out_arr[query] = list(set(cur_arr))
     return out_arr
 
-def write_translate2result(file_path='./data/input'):
-    with open(file_path, encoding='utf-8') as f, open(file_path + "_translate", 'w', encoding='utf-8') as out:
+def augment(file_='./data/input'):
+    """
+    file_: 输入文件，每行是一个query
+    """
+    with open(file_, encoding='utf-8') as f, open(file_ + ".augment.translate", 'w', encoding='utf-8') as out:
         query_arr = [x.strip() for x in f.readlines()]
         for k, v in back_translate(query_arr).items():
             out.write("\t".join([k, ";".join(v)]) + "\n")
@@ -78,7 +81,7 @@ def write_translate2result(file_path='./data/input'):
 
 
 if __name__ == '__main__':
-    write_translate2result()
+    augment()
     # result:
     # 帮我查一下航班信息	帮我查一下航班信息;请帮我查一下飞机的情报。;帮我检查航班信息。;检查我的航班信息。;检查航班;查一下我的飞行记录。;查一下我的航班信息。;检查一下飞行资料;检查飞行数据。;帮我查一下航班信息。;帮我查一下VOO信息;帮我查一下航班数据。;帮我查一下飞行记录。;请查一下飞机的信息。;幫我查一下班機資訊
     # 查一下航班信息	打听一下航班的信息。;检查航班;检查VOO信息;查看航班信息;检查飞行数据。;四航班检查;检查航班信息。;航班信息验证;查一下班機資訊;请查一下飞机的信息。;检查飞行信息;检查航班信息
