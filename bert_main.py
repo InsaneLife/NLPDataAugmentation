@@ -303,7 +303,7 @@ if __name__ == "__main__":
     queries = read_file("data/input")
     mask_model = BertAugmentor(model_dir)
     # bert 预测 mask
-    out_queries = mask_model.predict(["卖", "账", "[MASK]", "号", "[MASK]", "吗"], beam_size=5)
+    out_queries = mask_model.predict(["[MASK]", "[MASK]", "卖", "账", "号", "吗"], beam_size=5)
     # 随机替换：通过随机mask掉词语，预测可能的值。
     replace_result = mask_model.replace_word2queries(queries, beam_size=20)
     with open("data/bert_replace", 'w', encoding='utf-8') as out:
