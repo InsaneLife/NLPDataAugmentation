@@ -7,8 +7,7 @@
 @Desc    :   来源于：https://github.com/jasonwei20/eda_nlp, 原版本适用于英文，这里根据中文做了修改。修改如下：
 1. 停用词使用中文。停用词来源：https://github.com/goto456/stopwords
 2. 随机替换使用word_net/synonyms/词向量召回
-todo: 
-1. 更多的同义词召回方法: word_net/synonyms/词向量召回
+3. 更多的同义词召回方法: word_net/synonyms/词向量召回
 
 '''
 
@@ -215,17 +214,20 @@ def eda(sentence, alpha_sr=0.1, alpha_ri=0.1, alpha_rs=0.1, p_rd=0.1, num_aug=9)
 
     return augmented_sentences
 
-
-if __name__ == "__main__":
-    # 打开文件
-    queries = util.read_file('./data/input')
-    # eda增强
+def augment(file_):
+    """
+    file_: 输入文件，每行是一个query
+    """
+    queries = util.read_file(file_)
     result = {}
     for query in queries:
         result[query] = eda(query)
-        pass
     # 写出到文件
-    with open("./data/eda_chinese_out", 'w', encoding='utf-8') as out:
+    with open(file_ + ".augment.eda", 'w', encoding='utf-8') as out:
         for query, v in result.items():
             out.write("{}\t{}\n".format(query, ';'.join(v)))
     pass
+
+if __name__ == "__main__":
+    # 打开文件
+    queries = augment('./data/input')
