@@ -72,8 +72,8 @@ def get_masked_lm_output(bert_config, input_tensor, output_weights, positions):
 
 
 class BertAugmentor(object):
-    def __init__(self, model_dir, beam_num=5):
-        self.beam_num = beam_num    # 每个带mask的句子最多生成 beam_num 个。
+    def __init__(self, model_dir, beam_size=5):
+        self.beam_size = beam_size    # 每个带mask的句子最多生成 beam_size 个。
         # bert的配置文件
         self.bert_config_file = model_dir + 'bert_config.json'
         self.init_checkpoint = model_dir + 'bert_model.ckpt'
@@ -83,9 +83,12 @@ class BertAugmentor(object):
             self.bert_config_file)
         # token策略，由于是中文，使用了token分割，同时对于数字和英文使用char分割。
         self.token = tokenization.CharTokenizer(vocab_file=self.bert_vocab_file)
-        self.mask_id = self.token.convert_tokens_to_ids(["[MASK]"])[0]
-        self.cls_id = self.token.convert_tokens_to_ids(["[CLS]"])[0]
-        self.sep_id = self.token.convert_tokens_to_ids(["[SEP]"])[0]
+        self.mask_token = "[MASK]"
+        self.mask_id = self.token.convert_tokens_to_ids([self.mask_token])[0]
+        self.cls_token = "[CLS]"
+        self.cls_id = self.token.convert_tokens_to_ids([self.cls_token])[0]
+        self.sep_token = "[SEP]"
+        self.sep_id = self.token.convert_tokens_to_ids([self.sep_token])[0]
         # 构图
         self.build()
         # sess init
@@ -134,7 +137,7 @@ class BertAugmentor(object):
         self.sess.close()
 
     def predict_single_mask(self, word_ids:list, mask_index:int, prob:float=None):
-        """输入一个句子token id list，对其中第mask_index个的mask的可能内容，返回 self.beam_num 个候选词语，以及prob"""
+        """输入一个句子token id list，对其中第mask_index个的mask的可能内容，返回 self.beam_size 个候选词语，以及prob"""
         word_ids_out = []
         word_mask = [1] * len(word_ids)
         word_segment_ids = [0] * len(word_ids)
@@ -143,7 +146,7 @@ class BertAugmentor(object):
         mask_probs = self.sess.run(self.predict_prob, feed_dict=fd)
         for mask_prob in mask_probs:
             mask_prob = mask_prob.tolist()
-            max_num_index_list = map(mask_prob.index, heapq.nlargest(self.beam_num, mask_prob))
+            max_num_index_list = map(mask_prob.index, heapq.nlargest(self.beam_size, mask_prob))
             for i in max_num_index_list:
                 if prob and mask_prob[i] < prob:
                     continue
@@ -153,7 +156,7 @@ class BertAugmentor(object):
         return word_ids_out
     
     def predict_batch_mask(self, query_ids:list, mask_indexes:int, prob:float=0.5):
-        """输入多个token id list，对其中第mask_index个的mask的可能内容，返回 self.beam_num 个候选词语，以及prob
+        """输入多个token id list，对其中第mask_index个的mask的可能内容，返回 self.beam_size 个候选词语，以及prob
         word_ids: [word_ids1:list, ], shape=[batch, query_lenght]
         mask_indexes: query要预测的mask_id, [[mask_id], ...], shape=[batch, 1, 1]
         """
@@ -192,7 +195,7 @@ class BertAugmentor(object):
                     cur_arr = [[x[0], x[1] * prob] for x in cur_arr]
                     out_arr.extend(cur_arr)
                 # 筛选前beam size个
-                out_arr = sorted(out_arr, key=lambda x: x[1], reverse=True)[:self.beam_num]
+                out_arr = sorted(out_arr, key=lambda x: x[1], reverse=True)[:self.beam_size]
         for i, (each, _) in enumerate(out_arr):
             query_ = [self.token.id2vocab[x] for x in each]
             out_arr[i][0] = query_
@@ -232,7 +235,7 @@ class BertAugmentor(object):
             pass
         # 这个是所有生成的句子中，筛选出前 beam size 个。
         out_arr = sorted(out_arr, key=lambda x: x[1], reverse=True)
-        out_arr = ["".join(x[0][1:-1]) for x in out_arr[:self.beam_num]]
+        out_arr = ["".join(x[0][1:-1]) for x in out_arr[:self.beam_size]]
         return out_arr
     
     def word_replace(self, query):
@@ -264,69 +267,33 @@ class BertAugmentor(object):
             out_arr.extend(arr_)
             pass
         out_arr = sorted(out_arr, key=lambda x: x[1], reverse=True)
-        out_arr = ["".join(x[0][1:-1]) for x in out_arr[:self.beam_num]]
+        out_arr = ["".join(x[0][1:-1]) for x in out_arr[:self.beam_size]]
         return out_arr
 
-    def insert_word2queries(self, queries:list, beam_num=10):
-        self.beam_num = beam_num
+    def insert_word2queries(self, queries:list, beam_size=10):
+        self.beam_size = beam_size
         out_map = defaultdict(list)
         for query in queries:
             out_map[query] = self.word_insert(query)
         return out_map
 
-    def replace_word2queries(self, queries:list, beam_num=10):
-        self.beam_num = beam_num
+    def replace_word2queries(self, queries:list, beam_size=10):
+        self.beam_size = beam_size
         out_map = defaultdict(list)
         for query in queries:
             out_map[query] = self.word_replace(query)
         return out_map
 
-    def predict(self, queries):
+    def predict(self, query_arr, beam_size=None):
         """
-        query_arr: [["w1", "w2", "[MASK]", ...]], shape=[batch_size, word_len]
+        query_arr: ["w1", "w2", "[MASK]", ...], shape=[word_len]
+        每个query_arr, 都会返回beam_size个
         """
-        out_map = defaultdict(list)
-        for query in queries:
-            split_tokens = self.token.tokenize(query)
-            word_ids = self.token.convert_tokens_to_ids(split_tokens)
-            word_ids.insert(0, self.token.convert_tokens_to_ids(["[CLS]"])[0])
-            word_ids.append(self.token.convert_tokens_to_ids(["[SEP]"])[0])
-
-            # 分词
-            index_arr = [0]
-            seg_list = jieba.cut(query, cut_all=False)
-            i = 0
-            for each in seg_list:
-                i += len(each)
-                index_arr.append(i)
-
-            # 插入字符
-            for i in index_arr:
-                insert_index = i + 1
-                # print("index", i)
-                word_ids.insert(
-                    insert_index, self.mask_id)
-                mask_lm_position = [insert_index]
-                word_mask = [1] * len(word_ids)
-                word_segment_ids = [0] * len(word_ids)
-                fd = {self.input_ids: [word_ids], self.input_mask: [word_mask],
-                      self.segment_ids: [word_segment_ids], 
-                      self.masked_lm_positions: [mask_lm_position]}
-                mask_probs = self.sess.run(self.predict_prob, feed_dict=fd)
-                for mask_prob in mask_probs:
-                    mask_prob = mask_prob.tolist()
-                    max_num_index_list = map(
-                        mask_prob.index, heapq.nlargest(self.n_best, mask_prob))
-                    for i in max_num_index_list:
-                        words = self.token.id2vocab[i]
-                        if words in punc:
-                            continue
-                        new_query = [x for x in query]
-                        new_query.insert(insert_index-1, words)
-                        # print("".join(new_query))
-                        out_map[query].append("".join(new_query))
-            pass
-        return out_map
+        self.beam_size = beam_size if beam_size else self.beam_size
+        word_ids, indexes = self.token.convert_tokens_to_ids(query_arr), [x[0] for x in filter(lambda x: x[1] == self.mask_token, enumerate(query_arr))]
+        out_queries = self.gen_sen(word_ids, indexes)
+        out_queries = [["".join(x[0]), x[1]] for x in out_queries]
+        return out_queries
 
 
 if __name__ == "__main__":
@@ -335,13 +302,15 @@ if __name__ == "__main__":
     # query输入文件，每个query一行
     queries = read_file("data/input")
     mask_model = BertAugmentor(model_dir)
+    # bert 预测 mask
+    out_queries = mask_model.predict(["卖", "账", "[MASK]", "号", "[MASK]", "吗"], beam_size=5)
     # 随机替换：通过随机mask掉词语，预测可能的值。
-    replace_result = mask_model.replace_word2queries(queries, beam_num=20)
+    replace_result = mask_model.replace_word2queries(queries, beam_size=20)
     with open("data/bert_replace", 'w', encoding='utf-8') as out:
         for query, v in replace_result.items():
             out.write("{}\t{}\n".format(query, ';'.join(v)))
     # 随机插入：通过随机插入mask，预测可能的词语, todo: 将随机插入变为beam search
-    insert_result = mask_model.insert_word2queries(queries, beam_num=20)
+    insert_result = mask_model.insert_word2queries(queries, beam_size=20)
     print("Augmentor's result:", insert_result)
     # 写出到文件
     with open("data/bert_insert", 'w', encoding='utf-8') as out:
