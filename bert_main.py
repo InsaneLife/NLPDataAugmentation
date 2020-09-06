@@ -136,7 +136,8 @@ class BertAugmentor(object):
         self.sess.run(tf.global_variables_initializer())
 
     def close_sess(self):
-        self.sess.close()
+        # self.sess.close()
+        pass
 
     def predict_single_mask(self, word_ids:list, mask_index:int, prob:float=None):
         """输入一个句子token id list，对其中第mask_index个的mask的可能内容，返回 self.beam_size 个候选词语，以及prob"""

@@ -95,7 +95,7 @@ print(w2v_model.similar_by_word(word)[:10])
 代码见 [bert_main.py](./bert_main.py) 
 > [中文bert模型下载](https://github.com/InsaneLife/ChineseNLPCorpus#bert)
 > 
-> 更多生成的结果查看[./data/bert_insert](./data/bert_output)、[./data/bert_replace](./data/bert_output)
+> 更多生成的结果查看[bert_insert](./data/input.augment.bert_insert)、[./data/bert_replace](./data/input.augment.bert_replace)
 
 # 回译
 通过将目标句子翻译为外语，然后将外语翻译成中文，翻译一般会重新组织句子结构，所以增强后的数据具备一定的句式丰富性，下面是使用了[百度翻译api](http://api.fanyi.baidu.com/api/trans/product/apidoc)的结果。
@@ -125,7 +125,7 @@ if __name__ == '__main__':
 ```text
 ['这里有什么有趣的？', '这里有什么有趣的', '这个地方有什么有趣的？', '这里有什么好玩的？', '这里有什么好玩的', '这个地方有什么好玩的？', '发生什么事了？', '这附近有什么好玩的地方吗', '有什么有趣的？', '附近有什么好玩的吗？', '这附近有什么好玩的', '附近有什麼好玩的', '附近有什么有趣的东西吗？']
 ```
-
+> 更多结果：[input.augment.translate](./data/input.augment.translate)
 
 
 # EDA
@@ -150,6 +150,7 @@ if __name__ == '__main__':
 ```text
 附近有什么自嘲的;附近有什么好玩的;好玩有什么附近的;附近有什么好玩有的;附近有新奇什么好玩的;附近有什么好玩的;附近的什么好玩有;有什么好玩的;附近有什么好像的;附近有什么好玩的
 ```
+> 更多结果：[./data/input.augment.eda](./data/input.augment.eda)
 
 从结果来看，eda里面除了同义词替换，其他生成的真的不靠谱，建议对准确率要求较高的场景，只用同义词替换，避免模型误召回乱七八糟的句子。
 
