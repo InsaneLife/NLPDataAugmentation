@@ -2,6 +2,15 @@
 # Chinese NLP Data Augmentation
 主要对中文SLU数据做数据增强，主要包括意图分类数据、槽位填充的数据。理论上分类数据也行。
 
+# 快速开始
+- 下载预训练的bert，中文bert下载链接：https://github.com/InsaneLife/ChineseNLPCorpus#%E9%A2%84%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8For%E6%A8%A1%E5%9E%8B
+- 如果需要回译，可以注册百度的翻译账号，填写到[back_translate.py](back_translate.py)中指定appid和key(28,29行)
+运行
+```shell
+python augmentor.py --bert_dir={bert下载地址} --input=${需要增强的文件路径,每行是一个句子}  
+```
+
+支持的功能如下：
 # 同义词替换
 应该是最早的方法， 通过对于语句中的同义词替换，保证语义不变性，根据同义词的来源，又可以分为几种方案
 
