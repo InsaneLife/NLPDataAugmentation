@@ -7,6 +7,7 @@
 - 如果需要回译，可以注册百度的翻译账号，填写到[back_translate.py](back_translate.py)中指定appid和key(28,29行)
 运行
 ```shell
+pip install -r requirement.txt
 python augmentor.py --bert_dir={bert下载地址} --input=${需要增强的文件路径,每行是一个句子}  
 ```
 
