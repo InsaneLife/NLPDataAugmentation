@@ -16,7 +16,8 @@ from nltk.corpus import wordnet
 import synonyms
 import time
 import nltk
-# nltk.download('omw')
+nltk.download('omw')
+nltk.download('wordnet')
 
 def load_w2v_fi():
     start = time.time()
