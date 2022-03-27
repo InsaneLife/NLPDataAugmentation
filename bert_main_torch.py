@@ -152,14 +152,23 @@ class BartAugmentor(BertAugmentor):
       gen_qs = self.gen_sen(''.join(new_query))
       out_arr.extend(gen_qs)
     return [''.join([y for i, y in enumerate(x['generated_text']) if i % 2 == 0]) for x in out_arr]
-
+  def augment(self, file_, num_aug=9):
+    """ 
+    file_: 输入文件，每行是一个query
+    """
+    # query输入文件，每个query一行
+    queries = read_file(file_)
+    with open(file_ + ".augment.bart_augment", 'w', encoding='utf-8') as out:
+      for query in queries:
+       augment_results = "|".join(self.aug(query, num_aug))
+       out.write(f'{query}\t{augment_results}\n')
 
 if __name__ == "__main__":
   # bert 模型下载地址，中文bert下载链接：https://github.com/InsaneLife/ChineseNLPCorpus#%E9%A2%84%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8For%E6%A8%A1%E5%9E%8B
   s = '帮我查一下航班信息'
-  # model = BartAugmentor()
-  # print(model.aug(s))
-  # model.augment('data/input')
+  model = BartAugmentor()
+  print(model.aug(s))
+  model.augment('data/input')
   model = BertAugmentor()
   print(model.aug(s))
   model.augment('data/input')

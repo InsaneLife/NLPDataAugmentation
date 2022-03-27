@@ -1,9 +1,9 @@
-tensorflow=1.11
+tensorflow==1.11
 Flask
 numpy
 jieba
 zhon
-transformers
+transformers==4.16
 gensim
 synonyms
 heapq
