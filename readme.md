@@ -2,7 +2,7 @@
 
 更新：
 
-- 由于tf比较难用，最近转成了torch，并且添加了基于bert、bart的生成，详细见[bert_main_torch.py](https://github.com/InsaneLife/NLPDataAugmentation/blob/master/bert_main_torch.py)
+- 由于tf版本间兼容较差，最近转成了torch，并且添加了基于bert、bart的生成，详细见[bert_main_torch.py](https://github.com/InsaneLife/NLPDataAugmentation/blob/master/bert_main_torch.py)
 
   ，bart生成结果见[input.augment.bart_augment](https://github.com/InsaneLife/NLPDataAugmentation/blob/master/data/input.augment.bart_augment)
 
